@@ -87,11 +87,13 @@ but for binary payload, value object should be used
 ----
 - int/long/str - they can de specified directly as a value of a field
 - {"vtype": "BYTES", "base64": "my_payload_base64"} - binary payload passed as base64
+- {"vtype": "BYTES", "generate": ... } - generate bytes payload. see below
 - {"vtype": "EXPRESSION", "expr": "TCPOptions()"} - python expression(normally, should be avoided)
 - {"vtype": "UNDEFINED"} - unset field value, and let it be assigned automatically
 - {"vtype": "RANDOM"} - assign a random value to a field
 ----
 
+==== Binary payload example
 Example of object value usage(to specify binary payload)
 ----
 Ether()/IP()/TCP()/Raw(load=my_payload)
@@ -111,6 +113,33 @@ Ether()/IP()/TCP()/Raw(load=my_payload)
         ]}
 ]
 ----
+
+==== Generating binary payload
+
+[source,python]
+----
+# generate 64 bytes of printable ascii payload
+# seed is optional number to define a pseudo-random number sequence
+- {"vtype": "BYTES", "generate": "random_ascii", "size": 64, "seed": 12345}
+
+# generate 32 bytes(from 0 to 0xFF bytes), using default seed value
+- {"vtype": "BYTES", "generate": "random_bytes", "size": 32}
+
+# generate 32 bytes using repeating/cut specified template
+- {"vtype": "BYTES", "generate": "template", "size": 32, template_base64: "<base64 string>"}
+
+# same as generate from template, but template is specified with a hex string
+# spaces and 0x are ignored. only 2 character hex values currently allowed
+- {"vtype": "BYTES", "generate": "template_code", "size": 8, template_code: "DE AD BE EF 13 10"}
+
+# generate random bytes to fill the packet size to 128 bytes
+# you can also replace 'size' parameter with a 'total_size' in any examples above.
+# generator size or total_size parameter to be specified.
+#There should be no multiple payloads with total_size
+- {"vtype": "BYTES", "generate": "random_bytes", "total_size": 128}
+----
+
+
 
 === Scapy packet result payload [[build_pkt_output]]
 build_pkt and reconstruct pkt take packet model and produce result JSON,
